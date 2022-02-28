@@ -10,7 +10,7 @@ contains Platform IO project for programming the microcontroller. We used a Spar
 ### interface
 contains an Angular project that reads from the realtime database to update a webpage at https://a-fabric-that-remembers-rtd.web.app/
 
-### Installing and Debugging the Hardware
+## Installing and Debugging the Hardware
 
 1. pull/clone this directory
 2. open the project using the Platform IO extension in VSCode. 
@@ -21,7 +21,7 @@ contains an Angular project that reads from the realtime database to update a we
 :old_key:	Note: if you are looking to run our project, you will need to request the firebase key and database id directly from us and insert it into the code in the indicated positions
 
 
-### Installing Interface Code
+## Installing Interface Code
 1. pull/clone this directory
 2. navigate to the /interface directory and run `npm install`
 3. run `ng serve` to deploy and test code changes locally
