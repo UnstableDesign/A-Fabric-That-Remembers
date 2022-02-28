@@ -26,15 +26,15 @@
 //Provide the RTDB payload printing info and other helper functions.
 #include "addons/RTDBHelper.h"
 
-// Insert your network credentials
-#define WIFI_SSID "UnstableWifi"
-#define WIFI_PASSWORD "fluxusmuxus"
+// Insert your network credentials - must be 2.4 Ghz
+#define WIFI_SSID "YOUR WIFI NETWORK HERE"
+#define WIFI_PASSWORD "YOUR PASSWORD HERE"
 
 // Insert Firebase project API Key
-#define API_KEY "AIzaSyBE_4QqCs8XKT38lZe2-h-eDOKRJAnaeVU"
+#define API_KEY "FIREBASE API KEY HERE"
 
 // Insert RTDB URLefine the RTDB URL */
-#define DATABASE_URL "https://a-fabric-that-remembers-rtd-default-rtdb.firebaseio.com/" 
+#define DATABASE_URL "DATABASE URL HERE" 
 
 //Define Firebase Data object
 FirebaseData fbdo;
@@ -72,95 +72,6 @@ void print_raw_values(){
   }  
 }
 
-
-void writeValToFB(int vals[]){
-
-
-
- if (Firebase.ready() && signupOK){
-
-   // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setInt(&fbdo, "pressdata/reg0", vals[0])){
-      // Serial.println("PASSED");
-      // Serial.println("PATH: " + fbdo.dataPath());
-      // Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-
-      delay(10);
-
- 
-
-  // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setInt(&fbdo, "pressdata/reg1", vals[1])){
-      // Serial.println("PASSED");
-      // Serial.println("PATH: " + fbdo.dataPath());
-      // Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-
-          delay(10);
-
-
-    // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setInt(&fbdo, "pressdata/reg2", vals[2])){
-      // Serial.println("PASSED");
-      // Serial.println("PATH: " + fbdo.dataPath());
-      // Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-
-          delay(10);
-
-
-      // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setInt(&fbdo, "pressdata/reg3", vals[3])){
-      // Serial.println("PASSED");
-      // Serial.println("PATH: " + fbdo.dataPath());
-      // Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-      delay(10);
-
-      // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setInt(&fbdo, "pressdata/reg4", vals[4])){
-      // Serial.println("PASSED");
-      // Serial.println("PATH: " + fbdo.dataPath());
-      // Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-      delay(10);
-
-      // Write an Int number on the database path test/int
-    // if (Firebase.RTDB.setInt(&fbdo, "pressdata/reg5", vals[5])){
-    //   Serial.println("PASSED");
-    //   Serial.println("PATH: " + fbdo.dataPath());
-    //   Serial.println("TYPE: " + fbdo.dataType());
-    // }
-    // else {
-    //   Serial.println("FAILED");
-    //   Serial.println("REASON: " + fbdo.errorReason());
-    // }
-
-
- }
-
-}
 
 void write_region_to_firebase(int region_id, int value){
      // Write an Int number on the database path test/int
@@ -246,8 +157,6 @@ void loop(){
 
   read_values();
   print_raw_values();
-  // send values from fabric to the websocket
-  //print_offset_steps(); // printing has been commented out in final version
   delay(100);
   
   
