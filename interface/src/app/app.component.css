@@ -1,0 +1,203 @@
+
+
+div{
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+#gradient{
+	display: inline-block;
+	width: 150px;
+	height: 20px;
+	background: rgb(255,0,0);
+	background: linear-gradient(90deg, rgba(255,0,0,0) 0%, rgba(255,0,0,1) 100%);
+}
+
+#sketch{
+	padding: 3vh 3vw;
+	width: 94vw;
+	height: 94vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+}
+
+
+.nav{
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+  	justify-content: space-between;
+	flex-grow: 2;
+	margin-bottom: 8px;
+
+}
+
+.title{
+	justify-content: left;
+	flex-grow: 2;
+	font-size: 2em;
+	font-style: normal;
+	font-weight: normal;
+	margin-top: auto;
+	color: red;
+}
+
+.nav .links{
+	display: flex;
+	flex-grow: 1;
+	flex-direction:row;
+	justify-content: flex-end;
+	margin-top: auto;
+
+}
+
+
+.nav a,
+.nav a:link{
+		color: red;
+		text-align: center;
+		text-decoration: none;
+		background-color: white;
+		border: thin solid red;
+		font-size: 12px;
+		width: 25%;
+		height: 2em;
+		padding-top: 1em;
+		margin-left: 8px;
+}
+
+
+
+
+.map{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	border: 1px solid red;
+}
+
+.press_row{
+	display: flex;
+	justify-content: center;
+	flex-direction: row;
+}
+
+.press_container{
+	display: flex;
+	justify-content: space-between;
+}
+
+.top-row{
+	width: 80%;
+}
+
+.middle-row{
+	width: 50%;
+}
+
+.bottom-row{
+	width: 75%;
+}
+
+.press{
+	width: 20vw;
+	height: 18vh;
+	margin: 2vh 0;
+}
+
+
+
+.key{
+	color: red;
+	font-size: 12px;
+	line-height: 1.2em;
+	margin: 8px;
+	flex-grow: 2;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+}
+
+
+.key span{
+	margin-bottom: -5px;
+	margin-left: 5px;
+
+
+}
+
+.history_slider{
+	display: none;
+	flex-direction: column;
+	font-size: 12px;
+    line-height: 1.2em;
+    margin: 8px;
+    flex-grow: 2;
+}
+
+.graph_row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 100%;
+    align-items: stretch;
+
+}
+
+.graph{
+	display: flex;
+	flex-direction: row;
+	width: 88%;
+	border: 1px solid rgba(255,255,255,.5);
+	height: 90%;
+}
+
+.graph_key{
+	display: flex;
+	flex-direction: row;
+	 align-items: stretch;
+	 justify-content: center;
+	 width: 88%;
+
+}
+
+.graph_key div{
+	width: 100%;
+}
+
+#begin{
+	text-align: left;
+}
+
+#end{
+	text-align: right;
+}
+
+.y-lables{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 10%;	
+	height: 90%;
+	font-size: 12px;
+}
+
+.graph-segment{
+	background-color: rgba(255,255,255,.5);
+	border-right: 1px solid rgba(255,255,255,.5);
+}
+
+.measurement{
+	background-color: rgb(11,66,110);
+}
+
+
+
+
+
+
+.live{
+	display: flex;
+}
+
+

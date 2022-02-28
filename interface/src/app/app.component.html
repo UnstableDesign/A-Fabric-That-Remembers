@@ -1,0 +1,75 @@
+ <div id='sketch'>
+
+      <div class="nav">
+        <div id="title" class="title">A Fabric That Remembers</div>
+        <div class="links">
+        <a id="past" (click)="swapToPastMode()">Past</a>
+        <a id="present" (click)="swapToPresentMode()">Present</a>
+        </div>
+      </div>
+
+      <div class="map" id="map">
+        <div class="press_row">
+          <div class="press_container top-row">
+            <div id="region_1" class="press">
+              <!-- //{{regions[0].dbid}} // {{regions[0].target}} -->
+            </div>
+            <div id="region_2" class="press">
+              <!-- {{regions[1].dbid}} // {{regions[1].target}} -->
+            </div>
+          </div>
+        </div>
+
+        <div class="press_row">
+          <div class="press_container middle-row">
+            <div id="region_3" class="press">
+              <!-- {{regions[2].dbid}} // {{regions[2].target}} -->
+            </div>
+            <div id="region_4" class="press">
+              <!-- {{regions[3].dbid}} // {{regions[3].target}} -->
+            </div>
+          </div>
+        </div>
+
+       <div class="press_row">
+          <div class="press_container bottom-row">
+            <div id="region_5" class="press">
+              <!-- {{regions[4].dbid}} // {{regions[4].target}} -->
+            </div>
+            <div id="region_6" class="press">
+              <!-- {{regions[5].dbid}} // {{regions[5].target}} -->
+            </div>
+          </div>
+       </div>
+     </div>
+
+     <div class="key" id="key">
+      <div id="live" class="live">
+        <span>least force</span><span id="gradient"></span><span>most force</span>
+      </div>
+    </div>
+
+
+    <div id="history_slider" class="history_slider">
+          <div class="graph_row">
+            <div id="graph" class="graph">
+              <!--activity graph divs appended here-->
+            </div>
+            <div class="y-lables">
+                <div class="most-pressed">more presses</div>
+                <div class="least-pressed">less presses</div>
+            </div>
+          </div>
+          <div class="grpah_row graph_key">
+            <div id="begin"></div>
+            <div style="text-align: center">ACTIVITY LOG</div>
+            <div id="end"></div>
+          </div>
+      </div>
+
+<!-- 
+Hello world
+  
+  <ul>
+    <li *ngFor="let item of data"> {{item}} </li>  
+  </ul> -->
