@@ -4,6 +4,11 @@ div{
 	font-family: Arial, Helvetica, sans-serif;
 }
 
+.graph div{
+	background-color: rgba(255,255,255,.5);
+	border-right: 1px solid rgba(255,255,255,.5);
+}
+
 #gradient{
 	display: inline-block;
 	width: 150px;
@@ -182,10 +187,7 @@ div{
 	font-size: 12px;
 }
 
-.graph-segment{
-	background-color: rgba(255,255,255,.5);
-	border-right: 1px solid rgba(255,255,255,.5);
-}
+
 
 .measurement{
 	background-color: rgb(11,66,110);

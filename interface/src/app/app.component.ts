@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { HostListener, Component } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
+
+
 
 export interface StampRow{
   stamp: number,
@@ -10,6 +12,7 @@ export interface StampRow{
 export interface DataHistory{
  data: Array<StampRow>; 
 }
+
 
 
 @Component({
@@ -56,10 +59,10 @@ export class AppComponent {
 
 
   constructor(firestore: AngularFirestore, private db: AngularFireDatabase){
-    this.regions.push({value: 0,target: 0,dbid: 0, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 1, background_color:"rgba(255, 0, 0, 0.3)"});
-    this.regions.push({value: 0,target: 0,dbid: 2, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 0, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 3, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 2, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 4, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 5, background_color:"rgba(255, 0, 0, 0.3)"});
 
@@ -69,24 +72,20 @@ export class AppComponent {
 
 
     const ref = this.db.list('pressdata');
-
     ref.valueChanges().subscribe((data) => {
-       
       const processed_data: Array<number> = data.map(el => this.processData(el));
-
-      processed_data.forEach((val, ndx) => {
+      
+      if(this.view_mode === 'present'){
+        processed_data.forEach((val, ndx) => {
          this.regions[ndx].target = val;
        });
-
+      }
       this.logData(processed_data);
-    
-       
     });
 
     const itemRef = this.db.list<StampRow>('log');
     itemRef.valueChanges().subscribe((history) => {
       this.data_log = [];
-      console.log("data", history);
 
         history.forEach(row => {
           row.vals.forEach((val, reg) =>{
@@ -103,25 +102,27 @@ export class AppComponent {
 
   ngAfterViewInit(){
     const body = document.getElementById('sketch'); 
+    
     this.hs = document.getElementById("history_slider");
-    if(this.hs !== null) this.hs.addEventListener("touchmove", this.handleMove, false);
+   // if(this.hs !== null) this.hs.addEventListener("touchmove", this.handleTouchMove, false);
+  //  if(this.hs !== null) this.hs.addEventListener("mousemove", this.handleMouseMove, false).bind(this);
 
     this.regions.forEach((reg, i) => {
-      this.regions[i].el = document.getElementById('region_'+(i+1));
+      this.regions[i].el = document.getElementById('region_'+(reg.dbid+1));
     });
 
     window.requestAnimationFrame(() => this.draw());
 
   }
 
-  processData(data_in:any) : number{
-    if (data_in < 100) return 0;
-    if(data_in > 1000) return 255;
-    return Math.floor(data_in / 1000 * 255);
-  }
+processData(data_in:any) : number{
+  if (data_in < 100) return 0;
+  if(data_in > 1000) return 255;
+  return Math.floor(data_in / 1000 * 255);
+}
 
 
-handleMove(evt:any) {
+handleTouchMove(evt:any) {
 
   if(this.hs === null) return;
   evt.preventDefault();
@@ -139,19 +140,40 @@ handleMove(evt:any) {
 
 }
 
+handleMouseMove(evt:any) {
+
+  if(this.hs === null) return;
+  evt.preventDefault();
+
+  let seg = 0;
+  let offset = evt.clientX - this.hs.offsetLeft;
+  if(offset > 0){
+    seg = Math.floor(offset / this.history_resolution);
+  }
+
+  if(offset > this.hs.offsetWidth) seg = 50;
+
+  this.history_position = seg;
+  this.setHistoryColorValues(seg);
+
+}
+
 
 
 
 
  draw() {
 
-  // if(this.view_mode !== 'present'){
-  //   this.setHistoryColorValues(this.history_position);
-  // }
+  if(this.view_mode !== 'present'){
+    this.setHistoryColorValues(this.history_position);
+  }
 
   this.regions.forEach((reg, ndx) => {
     reg.el.style.backgroundColor = this.getColor(ndx);
   })
+  
+
+
 
   window.requestAnimationFrame(() => this.draw());
   
@@ -184,13 +206,15 @@ drawHistoryGraph(){
   	var end_str = date_end.getDate()+"-"+ this.months[date_end.getMonth()]+"-"+date_end.getFullYear();
     if(end !== null) end.innerHTML = end_str;
 
+
+    console.log("graph", graph)
+
   
     if(graph === null) return;
 
 		//draw the tick marks + bars
   	for(let i:number =0; i < this.history_resolution; i++){
-      // console.log(fp_timewindow);
-      // console.log(fp_timewindow.history[i][6],fp_timewindow.max, graph.offsetHeight);
+
        let y = this.fp_timewindow.history[i][6] / this.fp_timewindow.max * graph.offsetHeight;
        if(y <=0) y = 10;
        if(y >= 100) y = 90;
@@ -200,10 +224,13 @@ drawHistoryGraph(){
        div.id = i.toString();
        div.style.height = "100%";
        div.style.width = graph.offsetWidth/this.history_resolution+"%";
+       div.style.backgroundColor = "rgba(255,255,255,.5)";
+       div.style.borderRight = "1px solid rgba(255,255,255,.5)";
 
       let measure = document.createElement("div");
       measure.classList.add("measurement");
       measure.style.height = y+"%";
+      measure.style.backgroundColor = "rgb(11,66,110)"
       div.appendChild(measure);
       graph.appendChild(div);
 
@@ -232,13 +259,13 @@ getColor(region: number){
       this.regions[region].value += 10;
 
     }else if(this.regions[region].value === target_adjusted){
-      this.regions[region].target = 0;
+      if(this.view_mode === "present") this.regions[region].target = 0;
 
     }else{
       this.regions[region].value -= 10;
     }
 
-    var opacity = (this.regions[region].value)/255;
+  var opacity = (this.regions[region].value)/255;
 
 
   if(this.view_mode === "present"){
@@ -305,7 +332,7 @@ loadHistory(){
   
       for(var d in this.data_log){
       	var time_diff = parseInt(this.data_log[d].timestamp) - this.oldest_stamp;
-     		var cur_window = (parseInt(this.data_log[d].timestamp) - this.oldest_stamp) / time_window;
+     		var cur_window = Math.floor((this.data_log[d].timestamp - this.oldest_stamp) / time_window);
         
          if(time_window === 0) cur_window  = 0;
          console.log("window", cur_window);
@@ -372,7 +399,10 @@ setHistoryColorValues(time: number){
 
 	for(var i = 0; i < 6; i++){
 		history_value[i] = (history_value[i] / this.reg_timewindow.max)*255;
+    this.regions[i].target = history_value[i]
 	}
+
+
 	
 }
 
@@ -389,11 +419,19 @@ swapToPastMode() {
   const live = document.getElementById("key");
   const map = document.getElementById("map");
 
+
   if(live !== null) live.style.display = "none";
 
   if(title != null) title.style.color = "white";
 
-  if(map !== null)  map.style.border= "1px solid white";
+  if(map !== null){
+    map.style.border= "1px solid white";
+  }  
+
+
+  if(this.hs !== null){
+    this.hs.style.display= "flex";
+  }  
 
   if(body !== null){
     body.style.backgroundColor = this.c_blue;
