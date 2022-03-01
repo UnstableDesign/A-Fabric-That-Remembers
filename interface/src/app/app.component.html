@@ -51,7 +51,12 @@
     </div>
 
 
-    <div id="history_slider" class="history_slider" (mousemove)="handleMouseMove($event)">
+    <div id="history_slider" 
+    class="history_slider" 
+    (mousestart)="handleMouseMove($event)" 
+    (mousemove)="handleMouseMove($event)"  
+    (touchstart)="handleTouchMove($event)"
+    (touchmove)="handleTouchMove($event)">
           <div class="graph_row">
             <div id="graph" class="graph">
               <!--activity graph divs appended here-->

@@ -1,4 +1,4 @@
-import { HostListener, Component } from '@angular/core';
+import { HostListener, Component, Renderer2 as renderer } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
 
@@ -69,6 +69,10 @@ export class AppComponent {
 
   }
 
+  
+
+
+
   ngOnInit() : void {
 
 
@@ -115,8 +119,6 @@ export class AppComponent {
     const body = document.getElementById('sketch'); 
     this.data_in_el = document.getElementById('datain');     
     this.hs = document.getElementById("history_slider");
-   // if(this.hs !== null) this.hs.addEventListener("touchmove", this.handleTouchMove, false);
-  //  if(this.hs !== null) this.hs.addEventListener("mousemove", this.handleMouseMove, false).bind(this);
 
     this.regions.forEach((reg, i) => {
       this.regions[i].el = document.getElementById('region_'+(i+1));
@@ -125,6 +127,8 @@ export class AppComponent {
     window.requestAnimationFrame(() => this.draw());
 
   }
+
+
 
 processData(data_in:any, region: number) : number{
   let min = 100;
