@@ -45,7 +45,8 @@ export class AppComponent {
   };
 
   data_log: Array<any> = [];
-
+  data_in_el: any = null;
+  data_count: number = 0;
 
   
   oldest_stamp:number = 0;
@@ -59,10 +60,10 @@ export class AppComponent {
 
 
   constructor(firestore: AngularFirestore, private db: AngularFireDatabase){
-    this.regions.push({value: 0,target: 0,dbid: 1, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 0, background_color:"rgba(255, 0, 0, 0.3)"});
-    this.regions.push({value: 0,target: 0,dbid: 3, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 1, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 2, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 3, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 4, background_color:"rgba(255, 0, 0, 0.3)"});
     this.regions.push({value: 0,target: 0,dbid: 5, background_color:"rgba(255, 0, 0, 0.3)"});
 
@@ -73,14 +74,24 @@ export class AppComponent {
 
     const ref = this.db.list('pressdata');
     ref.valueChanges().subscribe((data) => {
-      const processed_data: Array<number> = data.map(el => this.processData(el));
-      
+
+
+      const processed_data: Array<number> = data.map((el, ndx) => this.processData(el, ndx));
+     
+      this.data_count++;     
+
       if(this.view_mode === 'present'){
         processed_data.forEach((val, ndx) => {
          this.regions[ndx].target = val;
        });
       }
-      this.logData(processed_data);
+
+      if(this.data_in_el !== null){
+        this.data_in_el.style.color = "red";
+        this.data_in_el.innerHTML = "data count: "+this.data_count+", data in: "+processed_data;   
+      }
+
+     
     });
 
     const itemRef = this.db.list<StampRow>('log');
@@ -102,23 +113,31 @@ export class AppComponent {
 
   ngAfterViewInit(){
     const body = document.getElementById('sketch'); 
-    
+    this.data_in_el = document.getElementById('datain');     
     this.hs = document.getElementById("history_slider");
    // if(this.hs !== null) this.hs.addEventListener("touchmove", this.handleTouchMove, false);
   //  if(this.hs !== null) this.hs.addEventListener("mousemove", this.handleMouseMove, false).bind(this);
 
     this.regions.forEach((reg, i) => {
-      this.regions[i].el = document.getElementById('region_'+(reg.dbid+1));
+      this.regions[i].el = document.getElementById('region_'+(i+1));
     });
 
     window.requestAnimationFrame(() => this.draw());
 
   }
 
-processData(data_in:any) : number{
-  if (data_in < 100) return 0;
-  if(data_in > 1000) return 255;
-  return Math.floor(data_in / 1000 * 255);
+processData(data_in:any, region: number) : number{
+  let min = 100;
+  let max = 1000;
+  if(region == 3){
+    min = 500;
+    max = 1500;
+  }
+
+
+  if (data_in < min) return 0;
+  if(data_in > max) return 255;
+  return Math.floor(data_in / max * 255);
 }
 
 

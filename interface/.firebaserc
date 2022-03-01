@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "a-fabric-that-remembers-rtd": {
+      "hosting": {
+        "AFtR": [
+          "a-fabric-that-remembers-rtd"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "a-fabric-that-remembers-rtd"
+  }
+}
