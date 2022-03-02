@@ -3,7 +3,9 @@ Sofwtare, Hardware, and Weaving Files for producing an interactive fabric instal
 
 ![A Fabric that Remembers Install at Center for Heritage, Arts, and Textile, Hong Kong](/documentation/chat_install.jpg)
 
+![the Present Mode of the interface shows press data in realtime](/documentation/interface_present.png)
 
+![the Past Mode of the interface shows where presses were collected over time](/documentation/interface_past.png)
 
 
 ## Directory Structure
@@ -43,3 +45,15 @@ contains images used in this readme.
 4. when satisified with code run `ng build` then `firebase deploy` to push the contents of the generated dist/ directory to your hosting server. 
 
 :old_key: Note: if you are looking to run our project, you will need to request a file that will be placed at interface/src/environments/environments.ts that contains all of our secret firebase authentication codes and API keys. 
+
+
+## Installing The Fabric
+1. connect the pin outs from the fabric to the breakout board as shown in this image: ![the Past Mode of the interface shows where presses were collected over time](/documentation/connection_detail.jpg). 
+2. Screw down terminals to secure connection. The black wire connects to power, the following grey wires are the analog outs for each section of the fabric. The breakout board contains the remaining wireing to complete the voltage dividers, using a fixed resistor of size 10 ohms. 
+3. Make sure the arudino code connects to your local 2.4GHz network.
+4. Upload the code, pressing the button labeled "0" as you upload to enable uploading mode on the Thing.  
+5. Ensure the microcontroller is connecting to the network and firebase by monitoring the serial montior. 
+6. When it works, disconnect the uploading cable and replace with a power cable. 
+7. Navigate to https://a-fabric-that-remembers-rtd.web.app/ to seeif your press data is transfering. SOmetimes, depending on the network, it may take 1-2 seconds to reflect your press data. 
+
+
