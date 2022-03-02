@@ -1,6 +1,10 @@
 # A Fabric that Remembers
 Sofwtare, Hardware, and Weaving Files for producing an interactive fabric installation. This fabric measures press via resistive sensing is 6 regions, transfers press data to a firebase realtime database and then visualizes the press data using and Angular project hosted on firebase. 
 
+![A Fabric that Remembers Install at Center for Heritage, Arts, and Textile, Hong Kong](/documentation/chat_install.jpg)
+
+
+
 
 ## Directory Structure
 
@@ -9,6 +13,17 @@ contains Platform IO project for programming the microcontroller. We used a Spar
 
 ### interface
 contains an Angular project that reads from the realtime database to update a webpage at https://a-fabric-that-remembers-rtd.web.app/
+
+### weave
+contains the weaving drafts and supporting documents used to develop the fabric.  
+- the .ada file was used to develop the core strcutures, can can be opened in https://adacad-weaver.firebaseapp.com/
+- the .tiff file was directly sent to our TC2 loom for weaving (3W, 30epi, warped with 20/2 cotton)
+- the .psd file displays the particular relationships between stitch regions and mapping.
+- the structure/ directory contains all the generated structures for the weave as bitmaps. 
+
+### documentation
+contains images used in this readme. 
+
 
 ## Installing and Debugging the Hardware
 
@@ -27,4 +42,4 @@ contains an Angular project that reads from the realtime database to update a we
 3. run `ng serve` to deploy and test code changes locally
 4. when satisified with code run `ng build` then `firebase deploy` to push the contents of the generated dist/ directory to your hosting server. 
 
-:old_key:	Note: if you are looking to run our project, you will need to request a file that will be placed at interface/src/environments/environments.ts that contains all of our secret firebase authentication codes and API keys. 
+:old_key: Note: if you are looking to run our project, you will need to request a file that will be placed at interface/src/environments/environments.ts that contains all of our secret firebase authentication codes and API keys. 
