@@ -79,7 +79,9 @@ Past mode allows a person to look through the memory of the fabric, revealing wh
 
 Behind the scenes, data is accumulated and logged every hour. It is only logged while the interface is running and the primary user is logged in. For viewing, all data points will be split into 50 regions, overtime, each segment of the history graph will represent a larger and larger portion of time. 
 
+## Acknowledgements
+This has been a collaborative project led by Laura Devendorf with weaving structure input by Sasha de Koninck, original network support by Shanel Wu and Emma Goodwill and documentation support by Mallory Benna and Nikita Menon. 
 
-### Past Mode
-![The Present Mode shows the incoming press data in realtime](/documentation/interface_present.png).
-Six large rectangles in the main window turn red when the corresponding region on the fabric is pressed. The depth of the red color corresponds to how hard the region is being pressed. At times, network delays can delay the reading (up to 5 seconds in our experince), so its best to press and wait. To ensure data, is in fact, stalled or being received, refer to the "data count" on teh bottom center of the view. This shows how many changes the interface has registered. If you are pressing the fabric, and this number is not changing, there is a network delay. When it does change, you should see the press values on the screen or as numeric values in the "data in" region. 
+
+## Read More and Demo Video
+https://unstable.design/a-fabric-that-remembers/
