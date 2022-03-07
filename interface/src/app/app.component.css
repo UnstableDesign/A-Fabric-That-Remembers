@@ -104,6 +104,24 @@ div{
 	width: 75%;
 }
 
+input{
+    color: red;
+    height: 13px;
+	border: thin solid red;
+	margin: 0px 3px 0px 0px;
+	font-size: .8em;
+}
+
+button{
+    color: red;
+    background: white;
+    /* height: 13px; */
+    border: thin solid red;
+    padding: 2px;
+    margin: 0px 3px 0px 0px;
+    font-size: .8em;
+}
+
 #datain{
 	color: white;
 }
@@ -133,6 +151,16 @@ div{
 	margin-left: 5px;
 
 
+}
+
+
+
+#overlay{
+	border: thin solid white;
+	z-index: 2;
+	position: relative;
+	top: 0px;
+	left: 0px;
 }
 
 .history_slider{

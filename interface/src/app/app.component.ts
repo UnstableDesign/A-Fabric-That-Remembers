@@ -1,7 +1,8 @@
-import { HostListener, Component, Renderer2 as renderer } from '@angular/core';
+import { Component } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
-
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import {environment} from '../environments/environment'
 
 
 export interface StampRow{
@@ -24,8 +25,11 @@ export class AppComponent {
 
   title = 'AFtR';
   data: any;
-  LOGMAX = 650000;
 
+  login_email = 'admin email'; 
+  login_password = 'password'; 
+  user:any = null;
+  showLoginFields = false;
 
   regions: Array<any> = [];
 
@@ -34,21 +38,13 @@ export class AppComponent {
   history_position:number = 50;
   view_mode:string = "present";
   history_resolution = 50; //adjust this if you want the history vis to be more or less detailed. 
-  
-  fp_timewindow = {
-    history: <Array<Array<number>>>[],
-    max: 0
-  };
-  reg_timewindow = {
-    history: <Array<Array<number>>>[],
-    max: 0
-  };
+  region_press_history: Array<Array<number>> = [];
 
-  data_log: Array<any> = [];
+  graph_cell_width: number = 0;
+
   data_in_el: any = null;
   data_count: number = 0;
-
-  
+  data_in: Array<{stamp: number, vals: Array<number>}> = [];
   oldest_stamp:number = 0;
   newest_stamp:number =  0;
   months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug","Sept","Oct","Nov","Dec"];
@@ -59,13 +55,17 @@ export class AppComponent {
   hs: any;
 
 
-  constructor(firestore: AngularFirestore, private db: AngularFireDatabase){
-    this.regions.push({value: 0,target: 0,dbid: 0, background_color:"rgba(255, 0, 0, 0.3)"});
-    this.regions.push({value: 0,target: 0,dbid: 1, background_color:"rgba(255, 0, 0, 0.3)"});
-    this.regions.push({value: 0,target: 0,dbid: 2, background_color:"rgba(255, 0, 0, 0.3)"});
-    this.regions.push({value: 0,target: 0,dbid: 3, background_color:"rgba(255, 0, 0, 0.3)"});
-    this.regions.push({value: 0,target: 0,dbid: 4, background_color:"rgba(255, 0, 0, 0.3)"});
-    this.regions.push({value: 0,target: 0,dbid: 5, background_color:"rgba(255, 0, 0, 0.3)"});
+
+
+  constructor(firestore: AngularFirestore, private db: AngularFireDatabase, public auth: AngularFireAuth){
+    this.regions.push({value: 0,target: 0,dbid: 0, min: 500, max: 1200,  background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 1, min: 500, max: 2000, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 2, min: 500, max: 1500, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 3, min: 500, max: 2000, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 4, min: 500, max: 2000, background_color:"rgba(255, 0, 0, 0.3)"});
+    this.regions.push({value: 0,target: 0,dbid: 5, min: 500, max: 2000, background_color:"rgba(255, 0, 0, 0.3)"});
+
+
 
   }
 
@@ -81,7 +81,6 @@ export class AppComponent {
 
 
       const processed_data: Array<number> = data.map((el, ndx) => this.processData(el, ndx));
-     
       this.data_count++;     
 
       if(this.view_mode === 'present'){
@@ -95,21 +94,29 @@ export class AppComponent {
         this.data_in_el.innerHTML = "data count: "+this.data_count+", data in: "+processed_data;   
       }
 
+
+      this.auth.onAuthStateChanged((user) => {
+        if (user) {
+          // User is signed in, see docs for a list of available properties
+          // https://firebase.google.com/docs/reference/js/firebase.User
+          this.user = user.uid;
+          // ...
+        } else {
+          // User is signed out
+          // ...
+          this.user = null;
+        }
+      });
+
+      const non_zero: Array<number> = processed_data.filter(el => el != 0);
+      if(non_zero.length > 0) this.logData(processed_data);
+
      
     });
 
     const itemRef = this.db.list<StampRow>('log');
     itemRef.valueChanges().subscribe((history) => {
-      this.data_log = [];
-
-        history.forEach(row => {
-          row.vals.forEach((val, reg) =>{
-            this.data_log.push({
-                timestamp: row.stamp,
-                region: reg,
-                value: val});
-            });
-          });
+        this.data_in = history;
         });
     
 
@@ -128,20 +135,29 @@ export class AppComponent {
 
   }
 
+  login() {
+    this.auth.signInWithEmailAndPassword(this.login_email, this.login_password).then(el => {
+      this.user = el.user?.uid;
+    })
+    .catch(err => {
+      console.log(err);
+      this.login_email = "error: try again"
+      this.login_password = ""
+    });
+  }
 
-
-processData(data_in:any, region: number) : number{
-  let min = 100;
-  let max = 1000;
-  if(region == 3){
-    min = 500;
-    max = 1500;
+  logout() {
+    this.auth.signOut();
   }
 
 
-  if (data_in < min) return 0;
-  if(data_in > max) return 255;
-  return Math.floor(data_in / max * 255);
+
+processData(data_in:any, region: number) : number{
+
+
+  if (data_in < this.regions[region].min) return 0;
+  if(data_in > this.regions[region].max) return 255;
+  return Math.floor(data_in / this.regions[region].max * 255);
 }
 
 
@@ -153,10 +169,15 @@ handleTouchMove(evt:any) {
   let seg = 0;
   let offset = evt.touches[0].clientX - this.hs.offsetLeft;
   if(offset > 0){
-    seg = Math.floor(offset / this.history_resolution);
+    seg = Math.floor(offset / this.graph_cell_width);
   }
 
-  if(offset > this.hs.offsetWidth) seg = 50;
+  if(seg >= this.history_resolution) seg = this.history_resolution-1;
+
+
+  const overlay = document.getElementById("overlay");
+  if(overlay !== null) overlay.style.left = (seg * this.graph_cell_width) +'px';
+
 
   this.history_position = seg;
   this.setHistoryColorValues(seg);
@@ -171,13 +192,16 @@ handleMouseMove(evt:any) {
   let seg = 0;
   let offset = evt.clientX - this.hs.offsetLeft;
   if(offset > 0){
-    seg = Math.floor(offset / this.history_resolution);
+    seg = Math.floor(offset / this.graph_cell_width);
   }
 
-  if(offset > this.hs.offsetWidth) seg = 50;
+  if(seg >= this.history_resolution) seg = this.history_resolution-1;
 
   this.history_position = seg;
   this.setHistoryColorValues(seg);
+
+  const overlay = document.getElementById("overlay");
+  if(overlay !== null) overlay.style.left = (seg * this.graph_cell_width) +'px';
 
 }
 
@@ -194,25 +218,21 @@ handleMouseMove(evt:any) {
   this.regions.forEach((reg, ndx) => {
     reg.el.style.backgroundColor = this.getColor(ndx);
   })
-  
-
-
 
   window.requestAnimationFrame(() => this.draw());
   
-
 }
 
 
-/*updated to new date format */
-drawHistoryGraph(){
+drawHistoryGraph(history_graph: Array<number>){
 
     this.clearHistoryGraph();
 
     const begin = document.getElementById("begin");
     const end = document.getElementById("end");
     const graph = document.getElementById("graph");
-   
+    const overlay = document.getElementById("overlay");
+
     this.hs.style.display = "flex";
 
   	var date_begin = new Date();
@@ -229,36 +249,35 @@ drawHistoryGraph(){
   	var end_str = date_end.getDate()+"-"+ this.months[date_end.getMonth()]+"-"+date_end.getFullYear();
     if(end !== null) end.innerHTML = end_str;
 
-
-    console.log("graph", graph)
-
   
     if(graph === null) return;
 
+    this.graph_cell_width = graph.offsetWidth/this.history_resolution;
+    if(overlay !== null) overlay.style.width = this.graph_cell_width+"px";
+
 		//draw the tick marks + bars
   	for(let i:number =0; i < this.history_resolution; i++){
+       
 
-       let y = this.fp_timewindow.history[i][6] / this.fp_timewindow.max * graph.offsetHeight;
-       if(y <=0) y = 10;
-       if(y >= 100) y = 90;
 
        let div = document.createElement("div");
        div.classList.add("graph-segment")
        div.id = i.toString();
        div.style.height = "100%";
-       div.style.width = graph.offsetWidth/this.history_resolution+"%";
+       div.style.width = this.graph_cell_width+"%";
        div.style.backgroundColor = "rgba(255,255,255,.5)";
        div.style.borderRight = "1px solid rgba(255,255,255,.5)";
 
       let measure = document.createElement("div");
       measure.classList.add("measurement");
-      measure.style.height = y+"%";
+      measure.style.height = (1-history_graph[i])*100+"%";
       measure.style.backgroundColor = "rgb(11,66,110)"
       div.appendChild(measure);
       graph.appendChild(div);
 
   	}
 }
+
 
 clearHistoryGraph(){
       const graph = document.getElementById("graph");
@@ -269,27 +288,21 @@ clearHistoryGraph(){
 }
 
 
-
-
-
-
 //note, changing these values makes the transition faster
 getColor(region: number){
 
+
   let target_adjusted = this.regions[region].target;
 
-    if(this.regions[region].value < target_adjusted){
-      this.regions[region].value += 10;
-
-    }else if(this.regions[region].value === target_adjusted){
-      if(this.view_mode === "present") this.regions[region].target = 0;
-
-    }else{
-      this.regions[region].value -= 10;
-    }
+  if(this.regions[region].value < target_adjusted){
+    this.regions[region].value += 10;
+  }else if(this.regions[region].value > target_adjusted -5 && this.regions[region].value < target_adjusted +5){
+    this.regions[region].target = 0;
+  }else{
+    this.regions[region].value -= 10;
+  }
 
   var opacity = (this.regions[region].value)/255;
-
 
   if(this.view_mode === "present"){
     return "rgba(255,0,0,"+opacity+")";
@@ -300,131 +313,110 @@ getColor(region: number){
 }
 
 
-//this loads the current log data and organizes it into structutres by region and time window for visualization
-loadHistory(){
+/**
+ * takes the database inputs and returns an array of size history resolution with the % amount of presses that accumulated in this 
+ * region relative to the max. 
+ * @returns 
+ */
+loadGraph() : Array<number> {
 
-  //store data for each region
- 	this.reg_timewindow.history = [];
- 	this.reg_timewindow.max = 0;
+  //first, figure out the start and end time of each window
+  if(this.data_in.length === 0) return [];
 
-  //store data for each frame in the history
- 	this.fp_timewindow.history = [];
- 	this.fp_timewindow.max = 0;
+  console.log("data in", this.data_in);
+
+   this.oldest_stamp = this.data_in[0].stamp;
+   this.newest_stamp = this.data_in[this.data_in.length-1].stamp;
+
+  var elapsed = this.newest_stamp - this.oldest_stamp; //total time
+  var time_window = elapsed / this.history_resolution; 
 
 
- 	for(var i = 0; i <= this.history_resolution; i++){
- 		this.fp_timewindow.history.push([]);
+  let max_presses_in_window = 0;
+  let sums: Array<number> = [];
 
-    this.regions.forEach((reg, j) => {
-      console.log(this.fp_timewindow);
-      this.fp_timewindow.history[i].push(0);
-    })
+  for(let i = 0; i < this.history_resolution; i++){
+    const window_min = this.oldest_stamp + (i * time_window);
+    const window_max =  this.oldest_stamp + ((i+1) * time_window);
+    const in_window: Array<{stamp:number, vals: Array<number>}> = this.data_in.filter(el => el.stamp > window_min && el.stamp <= window_max);
+    console.log(in_window);
 
- 		//write an extra element for totals
- 		this.fp_timewindow.history[i].push(0);
- 	}
-
-  this.regions.forEach((reg, i) => {
-    this.reg_timewindow.history.push([]);
-    for(var j = 0; j <= this.history_resolution; j++){
-      this.reg_timewindow.history[i].push(0);
-    }
-    //write an extra element for totals
-    this.reg_timewindow.history[i].push(0);
-  })
-
- 	//this function should show the total accumulated force within the time window saved.
-  
-    if(this.data_log.length == 0) return;
-    console.log("log loaded", this.data_log)
-
-    this.oldest_stamp = parseInt(this.data_log[0].timestamp);
-    this.newest_stamp = parseInt(this.data_log[0].timestamp);
-  
-    for(var d in this.data_log){
-    	if(parseInt(this.data_log[d].timestamp) > this.newest_stamp) this.newest_stamp = parseInt(this.data_log[d].timestamp);
-    	if(parseInt(this.data_log[d].timestamp) < this.oldest_stamp) this.oldest_stamp = parseInt(this.data_log[d].timestamp);
-    }
-  
-     	var elapsed = this.newest_stamp - this.oldest_stamp;
-     	var time_window = elapsed / this.history_resolution; 
-   
-  
-     	//does not require values ot be in order
-     	//writes an array of [time window][region][total force within time region]
-  
-      for(var d in this.data_log){
-      	var time_diff = parseInt(this.data_log[d].timestamp) - this.oldest_stamp;
-     		var cur_window = Math.floor((this.data_log[d].timestamp - this.oldest_stamp) / time_window);
-        
-         if(time_window === 0) cur_window  = 0;
-         console.log("window", cur_window);
-
-     		let window_array = this.fp_timewindow.history[cur_window];
-     	  window_array[parseInt(this.data_log[d].region)] = window_array[parseInt(this.data_log[d].region)] +parseInt(this.data_log[d].value);  
-     	   	//window_array[this.data_log[d].region] = int(window_array[this.data_log[d].region]) +1;  
-  
-     	  let region_array =  this.reg_timewindow.history[parseInt(this.data_log[d].region)];
-     	  region_array[cur_window] = region_array[parseInt(this.data_log[d].region)] + parseInt(this.data_log[d].value);
-     	   	//region_array[cur_window] = int(region_array[this.data_log[d].region]) + 1;
-     	}
-  
-  
-     	//now go through and caulculate the total forces by timewindow
-     	for(var f in this.fp_timewindow.history){
-     		var t = 0;
-     		for(var i = 0; i < 6; i++){
-     			t += this.fp_timewindow.history[f][i];
-     		}
-     		this.fp_timewindow.history[f][6] = t;
-     		if(t > this.fp_timewindow.max) this.fp_timewindow.max = t;
+    const all_values_in_window:Array<Array<number>> = in_window.map(el => el.vals);
+    let total:number = 0;
+    for(let j = 0; j <  all_values_in_window.length; j++){
+      for(let q = 0; q < all_values_in_window[j].length; q++){
+        total += all_values_in_window[j][q];
       }
-  
-      //	now go through and caulculate the total forces by region
-     	for(var r in this.reg_timewindow.history){
-     		var t = 0;
-     		var l = this.reg_timewindow.history[r].length -1;
-     		for(var i = 0; i < l; i++){
-     			t += this.reg_timewindow.history[r][i];
-     		}
-     		this.reg_timewindow.history[r][l] = t;
-     		if(t > this.reg_timewindow.max) this.reg_timewindow.max = t;
+    }
+    sums.push(total);
+    if(total > max_presses_in_window) max_presses_in_window = total;
+
+  }
+
+  return sums.map(el => el / max_presses_in_window);
+
+
+}
+
+
+/**
+ * calcuates the total forces captured within any timewindow and the % which came from each region
+ * @returns 
+ */
+loadRegionHistoryData() : Array<Array<number>> {
+
+  //first, figure out the start and end time of each window
+  if(this.data_in.length === 0) return [];
+
+   this.oldest_stamp = this.data_in[0].stamp;
+   this.newest_stamp = this.data_in[this.data_in.length-1].stamp;
+
+  var elapsed = this.newest_stamp - this.oldest_stamp; //total time
+  var time_window = elapsed / this.history_resolution; 
+
+
+  let region_values:Array<Array<number>> = [];
+
+  for(let i = 0; i < this.history_resolution; i++){
+    const window_min = this.oldest_stamp + (i * time_window);
+    const window_max =  this.oldest_stamp + ((i+1) * time_window);
+
+    const in_window: Array<{stamp:number, vals: Array<number>}> = this.data_in.filter(el => el.stamp > window_min && el.stamp <= window_max);
+    const all_values_in_window:Array<Array<number>> = in_window.map(el => el.vals);
+    
+    let total:number = 0;
+    let region_totals: Array<number> = [0, 0, 0, 0, 0, 0];
+    for(let j = 0; j <  all_values_in_window.length; j++){
+      for(let q = 0; q < all_values_in_window[j].length; q++){
+        region_totals[q] += all_values_in_window[j][q];
+        total += all_values_in_window[j][q];
       }
-  
-       
-  
-     let history_value = [];
-  
-  
-    //set history values to most and least pressed
-    for(r in this.reg_timewindow.history){
-    //	var last_value = this.reg_timewindow.history[r].length - 2;
-      this.setHistoryColorValues(parseInt(r));
     }
 
-   
+    if(total !== 0){
+      region_values.push(region_totals.map(el => el/total));
+    }else{
+      region_values.push(region_totals.map(el => 0));
+    }
+  }
 
- }
+  
+  return region_values;
+
+
+}
+
 
 
 setHistoryColorValues(time: number){
 
+  if(time < 0) time = 0;
+  if(time >= this.history_resolution) time = this.history_resolution -1;
 
-
-	let history_value = [0,0,0,0,0,0];
-	var ndx = 0;
-
-	for(var r in this.reg_timewindow.history){
-		for(var t = 0; t < time; t++){
-			history_value[r] = history_value[r] + this.reg_timewindow.history[r][t];
-		}
-	}
-
+  const active_frame = this.region_press_history[time];
 	for(var i = 0; i < 6; i++){
-		history_value[i] = (history_value[i] / this.reg_timewindow.max)*255;
-    this.regions[i].target = history_value[i]
+		this.regions[i].target = active_frame[i] *255;
 	}
-
 
 	
 }
@@ -479,8 +471,10 @@ swapToPastMode() {
 
 
 
-   this.loadHistory();
-   this.drawHistoryGraph();
+  const history_graph = this.loadGraph();
+  console.log("history graph", history_graph)
+  this.drawHistoryGraph(history_graph);
+  this.region_press_history = this.loadRegionHistoryData();
 
 
 }
@@ -526,8 +520,6 @@ swapToPastMode() {
 
 
 
-  //Update to Write to Local Storage.
-
   logData(data: Array<number>){
 
 
@@ -545,8 +537,11 @@ swapToPastMode() {
       }
 
     }
-    const itemRef = this.db.object('log/'+timestamp_hours);
-    itemRef.set({stamp: this.current_hour, vals: this.hour_data});
+    if(this.user === environment.uid){
+      console.log("logging data");
+      const itemRef = this.db.object('log/'+timestamp_hours);
+      itemRef.set({stamp: this.current_hour, vals: this.hour_data});
+    }
 
  }
 

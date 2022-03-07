@@ -12,10 +12,8 @@
         <div class="press_row">
           <div class="press_container top-row">
             <div id="region_6" class="press">
-              <!-- //{{regions[0].dbid}} // {{regions[0].target}} -->
             </div>
             <div id="region_5" class="press">
-              <!-- {{regions[1].dbid}} // {{regions[1].target}} -->
             </div>
           </div>
         </div>
@@ -23,10 +21,8 @@
         <div class="press_row">
           <div class="press_container middle-row">
             <div id="region_3" class="press">
-              <!-- {{regions[2].dbid}} // {{regions[2].target}} -->
             </div>
             <div id="region_4" class="press">
-              <!-- {{regions[3].dbid}} // {{regions[3].target}} -->
             </div>
           </div>
         </div>
@@ -34,19 +30,28 @@
        <div class="press_row">
           <div class="press_container bottom-row">
             <div id="region_1" class="press">
-              <!-- {{regions[4].dbid}} // {{regions[4].target}} -->
             </div>
             <div id="region_2" class="press">
-              <!-- {{regions[5].dbid}} // {{regions[5].target}} -->
             </div>
           </div>
        </div>
      </div>
 
      <div class="key" id="key">
+      <div id = "logininfo">
+        <div *ngIf="auth.user | async as user; else showLogin">
+          <span style="position: relative; top: -5px;">admin logged in</span>
+          <svg (click)="logout()" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px" fill="#FF0000"><g><path d="M0,0h24v24H0V0z" fill="none"/></g><g><path d="M17,8l-1.41,1.41L17.17,11H9v2h8.17l-1.58,1.58L17,16l4-4L17,8z M5,5h7V3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h7v-2H5V5z"/></g></svg>        </div>
+        <ng-template #showLogin>
+          <svg *ngIf="!showLoginFields" (click) = "showLoginFields = true" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="18px" viewBox="0 0 24 24" width="18px" fill="#FF0000"><g><rect fill="none" height="24" width="24"/></g><g><path d="M11,7L9.6,8.4l2.6,2.6H2v2h10.2l-2.6,2.6L11,17l5-5L11,7z M20,19h-8v2h8c1.1,0,2-0.9,2-2V5c0-1.1-0.9-2-2-2h-8v2h8V19z"/></g></svg>
+          <input *ngIf="showLoginFields" type="text" [(ngModel)]="login_email" matInput>
+          <input *ngIf="showLoginFields" type="text" [(ngModel)]="login_password" matInput>
+          <button *ngIf="showLoginFields" (click)="login()">login</button>
+        </ng-template>
+      </div>
        <div id="datain"></div>
       <div id="live" class="live">
-        <span>least force</span><span id="gradient"></span><span>most force</span>
+        <span>lighter press</span><span id="gradient"></span><span>harder press</span>
       </div>
     </div>
 
@@ -57,6 +62,7 @@
     (mousemove)="handleMouseMove($event)"  
     (touchstart)="handleTouchMove($event)"
     (touchmove)="handleTouchMove($event)">
+          <div id="overlay"></div>
           <div class="graph_row">
             <div id="graph" class="graph">
               <!--activity graph divs appended here-->
@@ -73,9 +79,3 @@
           </div>
       </div>
 
-<!-- 
-Hello world
-  
-  <ul>
-    <li *ngFor="let item of data"> {{item}} </li>  
-  </ul> -->
